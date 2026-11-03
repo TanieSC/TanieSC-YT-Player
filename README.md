@@ -99,7 +99,7 @@ dotnet run --project TanieSC_YT_Player
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE.txt).
 
 Third-party dependencies and their licenses are listed in [NOTICE](NOTICE.md).
 
