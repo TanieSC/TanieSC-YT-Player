@@ -87,7 +87,7 @@ No installer required. The app is portable — copy the folder to a USB stick an
 ### Build from source
 
 ```bash
-git clone https://github.com/yourusername/TanieSC_YT_Player.git
+git clone https://github.com/TanieSC/TanieSC_YT_Player.git
 cd TanieSC_YT_Player
 dotnet restore
 dotnet build -c Release
