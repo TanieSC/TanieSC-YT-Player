@@ -156,7 +156,10 @@ namespace TanieSC_YT_Player.Services
                 AutomaticDecompression = DecompressionMethods.None,
                 UseCookies = false,
                 AllowAutoRedirect = true,
-                ConnectTimeout = TimeSpan.FromSeconds(15),
+                ConnectTimeout = TimeSpan.FromSeconds(10),
+                PooledConnectionLifetime = TimeSpan.FromMinutes(15),
+                MaxConnectionsPerServer = 32,   // was 16
+                EnableMultipleHttp2Connections = true
             };
             _http = new HttpClient(handler) { Timeout = Timeout.InfiniteTimeSpan };
 
@@ -534,8 +537,8 @@ namespace TanieSC_YT_Player.Services
                     {
                         await resp.OutputStream.WriteAsync(buffer.AsMemory(0, n), linked.Token);
                     }
-                    catch (HttpListenerException) { break; }   // client disconnected
-                    catch (IOException) { break; }             // socket closed
+                    catch (HttpListenerException) { /* client aborted — normal */ }  // client disconnected
+                    catch (IOException) { /* client aborted — normal */ }            // socket closed
 
                     sent += n;
                 }

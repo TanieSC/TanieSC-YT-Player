@@ -459,7 +459,19 @@
         });
 
         // Temporary stall — buffer ran dry, waiting for data.
+        //videoEl.addEventListener('waiting', function () {
+        //    setState(PLAYER_STATE.BUFFERING);
+        //});
         videoEl.addEventListener('waiting', function () {
+        // If we're within 0.5 s of the end and the video has nothing more
+        // to give, treat this as "ended" rather than "buffering forever".
+            if (videoEl.duration > 0
+                && videoEl.duration - videoEl.currentTime < 0.5) {
+                setState(PLAYER_STATE.ENDED, { paused: true });
+                try { videoEl.pause(); } catch (_) {}
+                try { if (audioEl) audioEl.pause(); } catch (_) {}
+                return;
+            }
             setState(PLAYER_STATE.BUFFERING);
         });
 
