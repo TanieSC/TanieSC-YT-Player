@@ -124,6 +124,39 @@ dotnet run --project TanieSC_YT_Player
 ## How It Works
 
 The app is composed of five cooperating layers:
+```text
+┌─────────────────────────────────────────────────────────────────────┐
+│                        WPF UI (MainWindow.xaml)                     │
+│  Search box · Favorites · Pitch/Cents/Tempo sliders · Transport     │
+└────────────────────────────┬────────────────────────────────────────┘
+                             │ Commands & events
+                             ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                     C# Services (Services/)                         │
+│                                                                     │
+│  YouTubeService ──► YoutubeExplode ──► YouTube API                  │
+│  StreamProxy    ──► HttpListener    ──► googlevideo.com             │
+│  PlayerBridge   ──► ExecuteScriptAsync / WebMessageReceived         │
+└────────────────────────────┬────────────────────────────────────────┘
+                             │ JSON messages
+                             ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                   WebView2 Player Page (wwwroot/)                   │
+│                                                                     │
+│  index.html · yt-app.js · style.css                                 │
+│                                                                     │
+│  ┌──────────────────────────────────────────────────────────┐       │
+│  │  <video>  +  <audio>  OR  MSE MediaSource pipeline       │       │
+│  └─────────────────────────┬────────────────────────────────┘       │
+│                            │                                        │
+│                            ▼                                        │
+│  ┌──────────────────────────────────────────────────────────┐       │
+│  │  Web Audio Graph                                         │       │
+│  │  MediaElementSource ──► AudioWorklet ──► Destination     │       │
+│  │                         (SoundTouch DSP)                 │       │
+│  └──────────────────────────────────────────────────────────┘       │
+└─────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
