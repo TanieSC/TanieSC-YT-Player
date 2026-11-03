@@ -96,11 +96,82 @@ dotnet build -c Release
 dotnet run --project TanieSC_YT_Player
 
 ```
+---
+
+## Usage
+
+Basic playback
+Launch the app.
+
+Type a search query in the Search YouTube box, press Enter.
+
+Double-click a result (or click the ▶ button next to it) to play.
+
+Pitch shifting
+Move the Transpose slider to shift by whole semitones (−12 to +12).
+
+Move the Cents slider for fine adjustment (±100 cents = ±1 semitone).
+
+The label below shows the total shift: +3.50 st • 1.222×.
+
+Tempo control
+Move the Tempo slider to change playback speed.
+
+Pitch stays constant — you can slow a track to 0.75× without hearing a "chipmunk" or "deep voice" effect.
+
+Saving favorites
+Play a track.
+
+Adjust pitch/tempo to your liking.
+
+Click the ★ button on the search result — the track is saved with its current pitch.
+
+Next time, double-click it in the Favorites tab — it plays at the saved pitch automatically. 
+
+---
+
+## How It Works
+
+The app is composed of five cooperating layers:
+┌─────────────────────────────────────────────────────────────────────┐
+│                        WPF UI (MainWindow.xaml)                     │
+│  Search box · Favorites · Pitch/Cents/Tempo sliders · Transport     │
+└────────────────────────────┬────────────────────────────────────────┘
+                             │ Commands & events
+                             ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                     C# Services (Services/)                         │
+│                                                                     │
+│  YouTubeService ──► YoutubeExplode ──► YouTube API                  │
+│  StreamProxy    ──► HttpListener    ──► googlevideo.com             │
+│  PlayerBridge   ──► ExecuteScriptAsync / WebMessageReceived         │
+└────────────────────────────┬────────────────────────────────────────┘
+                             │ JSON messages
+                             ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                   WebView2 Player Page (wwwroot/)                   │
+│                                                                     │
+│  index.html · yt-app.js · style.css                                 │
+│                                                                     │
+│  ┌──────────────────────────────────────────────────────────┐       │
+│  │  <video>  +  <audio>  OR  MSE MediaSource pipeline       │       │
+│  └─────────────────────────┬────────────────────────────────┘       │
+│                            │                                        │
+│                            ▼                                        │
+│  ┌──────────────────────────────────────────────────────────┐       │
+│  │  Web Audio Graph                                         │       │
+│  │  MediaElementSource ──► AudioWorklet ──► Destination     │       │
+│  │                         (SoundTouch DSP)                 │       │
+│  └──────────────────────────────────────────────────────────┘       │
+└─────────────────────────────────────────────────────────────────────┘
+---
 
 ## License
 
 MIT — see [LICENSE](LICENSE.txt).
 
 Third-party dependencies and their licenses are listed in [NOTICE](NOTICE.md).
+
+---
 
 
