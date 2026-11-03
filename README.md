@@ -133,37 +133,7 @@ Next time, double-click it in the Favorites tab — it plays at the saved pitch 
 ## How It Works
 
 The app is composed of five cooperating layers:
-┌─────────────────────────────────────────────────────────────────────┐
-│                        WPF UI (MainWindow.xaml)                     │
-│  Search box · Favorites · Pitch/Cents/Tempo sliders · Transport     │
-└────────────────────────────┬────────────────────────────────────────┘
-                             │ Commands & events
-                             ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                     C# Services (Services/)                         │
-│                                                                     │
-│  YouTubeService ──► YoutubeExplode ──► YouTube API                  │
-│  StreamProxy    ──► HttpListener    ──► googlevideo.com             │
-│  PlayerBridge   ──► ExecuteScriptAsync / WebMessageReceived         │
-└────────────────────────────┬────────────────────────────────────────┘
-                             │ JSON messages
-                             ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                   WebView2 Player Page (wwwroot/)                   │
-│                                                                     │
-│  index.html · yt-app.js · style.css                                 │
-│                                                                     │
-│  ┌──────────────────────────────────────────────────────────┐       │
-│  │  <video>  +  <audio>  OR  MSE MediaSource pipeline       │       │
-│  └─────────────────────────┬────────────────────────────────┘       │
-│                            │                                        │
-│                            ▼                                        │
-│  ┌──────────────────────────────────────────────────────────┐       │
-│  │  Web Audio Graph                                         │       │
-│  │  MediaElementSource ──► AudioWorklet ──► Destination     │       │
-│  │                         (SoundTouch DSP)                 │       │
-│  └──────────────────────────────────────────────────────────┘       │
-└─────────────────────────────────────────────────────────────────────┘
+
 ---
 
 ## License
