@@ -94,3 +94,13 @@ cd TanieSC_YT_Player
 dotnet restore
 dotnet build -c Release
 dotnet run --project TanieSC_YT_Player
+
+```
+
+## License
+
+MIT — see [LICENSE](LICENSE).
+
+Third-party dependencies and their licenses are listed in [NOTICE](NOTICE).
+
+
