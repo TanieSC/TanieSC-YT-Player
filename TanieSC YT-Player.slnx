@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="TanieSC YT-Player Setup/TanieSC YT-Player Setup.vdproj" Type="Installer">
+    <Build />
+  </Project>
+  <Project Path="TanieSC YT-Player/TanieSC YT-Player.csproj" />
+</Solution>

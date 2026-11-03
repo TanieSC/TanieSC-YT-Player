@@ -1,0 +1,9 @@
+﻿<Application x:Class="TanieSC_YT_Player.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:TanieSC_YT_Player">
+    <!-- StartupUri="MainWindow.xaml" -->
+    <Application.Resources>
+         
+    </Application.Resources>
+</Application>

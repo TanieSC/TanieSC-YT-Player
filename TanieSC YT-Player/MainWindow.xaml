@@ -1,0 +1,462 @@
+﻿<Window x:Class="TanieSC_YT_Player.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        xmlns:local="clr-namespace:TanieSC_YT_Player"
+        mc:Ignorable="d"
+        Title="TanieSC — Pitch • Transpose • Key • Tempo"
+        Height="880" Width="1110" 
+        MinHeight="620" MinWidth="1110"
+        Background="#0E0E12" Foreground="#E8E8EE"
+        WindowStartupLocation="CenterScreen"
+        UseLayoutRounding="True"
+        TextOptions.TextFormattingMode="Display">
+    <!-- 1340 -->
+    <Window.Resources>
+        <local:ThumbnailConverter x:Key="ThumbConv"/>
+
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#C9C9D6"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+
+        <Style TargetType="Button">
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="Margin" Value="0,0,6,6"/>
+            <Setter Property="Background" Value="#23232E"/>
+            <Setter Property="Foreground" Value="#E8E8EE"/>
+            <Setter Property="BorderBrush" Value="#3A3A48"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="5">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#2E2E3C"/>
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#7FD1FF"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#3A3A4C"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.45"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="TextBox">
+            <Setter Property="Padding" Value="6,5"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
+            <Setter Property="Background" Value="#14141A"/>
+            <Setter Property="Foreground" Value="#E8E8EE"/>
+            <Setter Property="BorderBrush" Value="#3A3A48"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CaretBrush" Value="#7FD1FF"/>
+            <Setter Property="SelectionBrush" Value="#7FD1FF"/>
+        </Style>
+
+        <Style TargetType="Slider">
+            <Setter Property="Margin" Value="0,2,0,2"/>
+        </Style>
+
+        <Style x:Key="Header" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#7FD1FF"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+
+        <Style x:Key="Caption" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#8A8A9A"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Margin" Value="0,6,0,2"/>
+        </Style>
+
+        <Style x:Key="Value" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#FFD479"/>
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Margin" Value="0,0,0,2"/>
+        </Style>
+
+        <Style x:Key="ValueSmall" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#9FE8A0"/>
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Margin" Value="0,0,0,2"/>
+        </Style>
+
+        <Style TargetType="CheckBox">
+            <Setter Property="Foreground" Value="#C9C9D6"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Border x:Name="Box"
+                            Width="16" Height="16"
+                            CornerRadius="3"
+                            Background="#14141A"
+                            BorderBrush="#3A3A48"
+                            BorderThickness="1"
+                            VerticalAlignment="Center">
+                                <Path x:Name="Tick"
+                              Data="M 3,8 L 7,12 L 13,4"
+                              Stroke="#0E0E12"
+                              StrokeThickness="2"
+                              StrokeStartLineCap="Round"
+                              StrokeEndLineCap="Round"
+                              Visibility="Collapsed"/>
+                            </Border>
+                            <ContentPresenter Grid.Column="1"
+                                      Margin="6,0,0,0"
+                                      VerticalAlignment="Center"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Box"  Property="Background"   Value="#7FD1FF"/>
+                                <Setter TargetName="Box"  Property="BorderBrush"  Value="#7FD1FF"/>
+                                <Setter TargetName="Tick" Property="Visibility"   Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Box" Property="BorderBrush" Value="#7FD1FF"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.45"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Shared template for search results AND favorites -->
+        <DataTemplate x:Key="TrackItemTemplate">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="112"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Thumbnail -->
+                <Border Grid.Column="0" CornerRadius="6" ClipToBounds="True"
+                Background="#0B0E12" Height="63">
+                    <Image Source="{Binding ThumbnailUrl, Converter={StaticResource ThumbConv}}"
+                   Stretch="UniformToFill"/>
+                </Border>
+
+                <!-- Title / subtitle -->
+                <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding Title}" Foreground="#E6E9EF"
+                       FontSize="12.5" TextWrapping="Wrap" MaxHeight="34"
+                       TextTrimming="CharacterEllipsis"/>
+                    <TextBlock Text="{Binding Subtitle}" Style="{StaticResource Caption}"
+                       FontSize="11" Margin="0,4,0,0"
+                       TextTrimming="CharacterEllipsis"/>
+                </StackPanel>
+
+                <!-- Favorite + Play column -->
+                <StackPanel Grid.Column="3" VerticalAlignment="Center"
+                    Margin="8,0,0,0" Width="76">
+                    <CheckBox IsChecked="{Binding IsFavorite, Mode=TwoWay}"
+                      Content="★ Fav"
+                      FontSize="10"
+                      Foreground="#FFD479"
+                      VerticalAlignment="Center"
+                      Margin="0,0,0,4"
+                      ToolTip="Add / remove favorite"/>
+                    <TextBlock Text="{Binding SavedKeyLabel}"  
+                               FontFamily="Consolas"
+                               FontSize="9.5"
+                               HorizontalAlignment="Center"
+                               Margin="0,0,0,4"
+                               ToolTip="Saved transpose for this favorite">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="#FFD479"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SavedKeyLabel}" Value="0 st 0 ¢">
+                                        <Setter Property="Foreground" Value="#4A4A55"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <Button Content="▶"
+                    FontSize="13"
+                    Padding="6,3"
+                    HorizontalAlignment="Stretch"
+                    Click="PlayButton_Click"/>
+                </StackPanel>
+            </Grid>
+        </DataTemplate>        
+        
+    </Window.Resources>
+
+    <Grid Margin="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="380"/>
+            <ColumnDefinition Width="12"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- ============ LEFT : SEARCH ============ -->
+        <Border Grid.Column="0" Background="#16161D" BorderBrush="#2A2A34"
+        BorderThickness="1" CornerRadius="8" Padding="14">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <!-- caption -->
+                    <RowDefinition Height="Auto"/>
+                    <!-- search box -->
+                    <RowDefinition Height="3*"/>
+                    <!-- results -->
+                    <RowDefinition Height="Auto"/>
+                    <!-- favorites header -->
+                    <RowDefinition Height="2*"/>
+                    <!-- favorites list -->
+                    <RowDefinition Height="Auto"/>
+                    <!-- status -->
+                </Grid.RowDefinitions>
+
+                <!-- 0. Caption -->
+                <TextBlock Grid.Row="0" Text="SEARCH YOUTUBE"
+                   Style="{StaticResource Caption}"
+                   FontSize="12" FontWeight="Bold"
+                   Margin="0,0,0,10"/>
+
+                <!-- 1. Search box + button -->
+                <Grid Grid.Row="1" Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="SearchBox" Grid.Column="0"
+                     KeyDown="SearchBox_KeyDown"/>
+                    <Button x:Name="SearchButton" Grid.Column="2"
+                    Content="Search" Click="Search_Click"/>
+                </Grid>
+
+                <!-- 2. Results -->
+                <ListBox x:Name="ResultsList" Grid.Row="2"
+                 Background="Transparent" BorderThickness="0"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 ItemTemplate="{StaticResource TrackItemTemplate}"
+                 MouseDoubleClick="ResultsList_MouseDoubleClick"
+                 SelectionChanged="ResultsList_SelectionChanged">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Padding" Value="0"/>
+                            <Setter Property="Margin" Value="0,0,0,6"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBoxItem">
+                                        <Border x:Name="b" Background="#1B212A"
+                                        CornerRadius="8" Padding="8">
+                                            <ContentPresenter/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="b" Property="Background" Value="#232B36"/>
+                                            </Trigger>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter TargetName="b" Property="Background" Value="#1F3A57"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                </ListBox>
+
+                <!-- 3. Favorites header -->
+                <Grid Grid.Row="3" Margin="0,10,0,6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" Text="FAVORITES"
+                               Style="{StaticResource Caption}"
+                               FontSize="12" FontWeight="Bold"
+                               VerticalAlignment="Center" Margin="0"/>
+
+                    <TextBlock x:Name="LblFavCount" Grid.Column="1"
+                               Style="{StaticResource Caption}"
+                               Foreground="#8A8A9A"
+                               FontSize="10"
+                               VerticalAlignment="Center"
+                               Margin="8,0,8,0"/>
+                    <Button x:Name="ShuffleButton"
+                            Grid.Column="2"
+                            Content="🎲 25"
+                            Padding="8,2"
+                            FontSize="10"
+                            Margin="0,0,6,0"
+                            ToolTip="Show 25 random favorites (click again to restore)"
+                            Click="ShuffleFavorites_Click"/>
+                    <!--<Button Grid.Column="3"
+                            Content="Clear"
+                            Padding="8,2"
+                            FontSize="10"
+                            Margin="0,0,6,0"
+                            ToolTip="Remove all favorites"
+                            Click="ClearFavorites_Click"/>-->
+                </Grid>
+
+                <!-- 4. Favorites list -->
+                <ListBox x:Name="FavoritesList" Grid.Row="4"
+                 Background="Transparent" BorderThickness="0"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 ItemTemplate="{StaticResource TrackItemTemplate}"
+                 MouseDoubleClick="FavoritesList_MouseDoubleClick"
+                 SelectionChanged="FavoritesList_SelectionChanged">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Padding" Value="0"/>
+                            <Setter Property="Margin" Value="0,0,0,6"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBoxItem">
+                                        <Border x:Name="b" Background="#1E1A26"
+                                        CornerRadius="8" Padding="8">
+                                            <ContentPresenter/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="b" Property="Background" Value="#28202F"/>
+                                            </Trigger>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter TargetName="b" Property="Background" Value="#3A1F57"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                </ListBox>
+
+                <!-- 5. Status -->
+                <TextBlock Name="StatusSearch" Grid.Row="5" Margin="0,8,0,0" Style="{StaticResource Caption}"/>
+            </Grid>
+        </Border>
+
+        <!-- ============ RIGHT : PLAYER + CONTROLS ============ -->
+        <Grid Grid.Column="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- ================= VIDEO SURFACE ================= -->
+            <Border Grid.Row="0" CornerRadius="8" ClipToBounds="True"
+                BorderBrush="#2A2A34" BorderThickness="1" Background="#000">
+                <wv2:WebView2 x:Name="Player"/>
+            </Border>
+
+            <!-- ================= CONTROL DECK ================= -->
+            <Border Grid.Row="1" Margin="0,10,0,0" Padding="14"
+                Background="#16161D" BorderBrush="#2A2A34" BorderThickness="1" CornerRadius="8">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1.35*"/>
+                        <ColumnDefinition Width="18"/>
+                        <ColumnDefinition Width="1.35*"/>
+                        <!--<ColumnDefinition Width="18"/>
+                        <ColumnDefinition Width="1.35*"/>-->
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!--  COLUMN 0 : PITCH / KEY  -->
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="PITCH • TRANSPOSE • KEY" Style="{StaticResource Header}"/>
+
+                        <TextBlock Text="Transpose (semitones)   −12 … +12" Style="{StaticResource Caption}"/>
+                        <TextBlock x:Name="LblSemitones" Style="{StaticResource Value}" Text="0 st (C)"/>
+                        <Slider x:Name="SlSemitones" Minimum="-12" Maximum="12" Value="0"
+                                TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="SlSemitones_ValueChanged" Thumb.DragCompleted="PitchSlider_DragCompleted"/>
+
+                        <TextBlock Text="Fine tune (cents)   −100 … +100" Style="{StaticResource Caption}"/>
+                        <TextBlock x:Name="LblCents" Style="{StaticResource Value}" Text="0 ¢"/>
+                        <Slider x:Name="SlCents" Minimum="-100" Maximum="100" Value="0"
+                                TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="SlCents_ValueChanged" Thumb.DragCompleted="PitchSlider_DragCompleted"/>
+
+                        <TextBlock Text="Total pitch shift" Style="{StaticResource Caption}"/>
+                        <TextBlock x:Name="LblPitchTotal" Style="{StaticResource Value}" Text="0.00 st   •   1.000×"/>
+
+                        <UniformGrid Columns="2" Margin="0,10,0,0">
+                            <Button Content="Reset Pitch / Key" Click="BtnResetPitch_Click"/>
+                            <Button Content="Reset All"         Click="BtnResetAll_Click"/>
+                            <Button Content="♭  Key −1 st"      Click="BtnKeyDown_Click"/>
+                            <Button Content="♯  Key +1 st"      Click="BtnKeyUp_Click"/>
+                        </UniformGrid>
+                        <TextBlock Text="Engine" Style="{StaticResource Caption}"/>
+                        <TextBlock x:Name="LblEngine" Style="{StaticResource ValueSmall}" Text="initialising…"/>
+                    </StackPanel>
+
+                    <!--  COLUMN 2 : TEMPO / TRANSPORT  -->
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="TEMPO • TRANSPORT" Style="{StaticResource Header}"/>
+
+                        <TextBlock Text="Tempo (speed, pitch preserved)   ×0.25 … ×2.00" Style="{StaticResource Caption}"/>
+                        <TextBlock x:Name="LblTempo" Style="{StaticResource Value}" Text="1.000×"/>
+                        <Slider x:Name="SlTempo" Minimum="0.25" Maximum="2.0" Value="1.0"
+                            SmallChange="0.01" LargeChange="0.10"
+                            ValueChanged="SlTempo_ValueChanged"/>
+
+                        <TextBlock Text="Volume" Style="{StaticResource Caption}"/>
+                        <TextBlock x:Name="LblVolume" Style="{StaticResource Value}" Text="100"/>
+                        <Slider x:Name="SlVolume" Minimum="0" Maximum="100" Value="100"
+                            ValueChanged="SlVolume_ValueChanged"/>
+                        <TextBlock Text="Playback" Style="{StaticResource Caption}"/>
+                        <TextBlock x:Name="LblPlayback" Style="{StaticResource Value}" Text="state = –   t = 0.0 s"/>
+
+                        <UniformGrid Columns="3" Margin="0,10,0,0">
+                            <Button Content="⏮ −5 s" Click="BtnSeekBack_Click"/>
+                            <Button Content="⏯ Play / Pause" Click="BtnPlayPause_Click"/>
+                            <Button Content="⏭ +5 s" Click="BtnSeekForward_Click"/>
+                            <Button Content="Tempo −" Click="BtnTempoDown_Click"/>
+                            <Button Content="⏹ Stop" Click="BtnStop_Click"/>
+                            <Button Content="Tempo +" Click="BtnTempoUp_Click"/>
+                        </UniformGrid>
+                        <TextBlock Text="Server" Style="{StaticResource Caption}"/>
+                        <TextBlock x:Name="LblStatus" Style="{StaticResource ValueSmall}" 
+                                   Text="Ready." TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>
+

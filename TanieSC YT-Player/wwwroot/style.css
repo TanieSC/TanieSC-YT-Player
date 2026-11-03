@@ -1,0 +1,398 @@
+﻿/* ═══════════════════════════════════════════════════════════════════════
+   STYLESHEET FOR THE PLAYER PAGE
+   ═══════════════════════════════════════════════════════════════════════
+
+   WHAT THIS FILE IS:
+     CSS (Cascading Style Sheets) controls how the HTML elements look:
+     their size, position, colors, fonts, animations, etc. Without
+     CSS, the page would render as a plain unstyled document like
+     something from 1994.
+
+   HOW CSS WORKS:
+     A "rule" has the form:
+         selector { property: value; }
+     The selector picks elements ("#video", ".ph-icon", "body"), and
+     the properties say what to do with them.
+
+     Selectors used here:
+       • Tag name     →  body        (every <body> element)
+       • #id          →  #video      (the ONE element with id="video")
+       • .class       →  .ph-icon    (any element with class="ph-icon")
+       • Combination  →  #placeholder.hidden  (element with BOTH)
+
+   "CASCADING" — the order matters:
+     If two rules set the same property on the same element, the more
+     specific one wins. Order in the file also matters: later rules
+     override earlier ones when specificity is tied. This is why the
+     `.hidden` rule at the bottom of a block can override properties
+     set earlier — it "cascades" down.
+
+   THE DESIGN THEME:
+     This is a dark, media-player aesthetic: black background, light
+     text, everything positioned absolutely so the video fills the
+     screen and overlays sit on top.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+
+/* ───────────────────────────────────────────────────────────────────────
+   UNIVERSAL RESET: apply to EVERY element (* = all)
+   ───────────────────────────────────────────────────────────────────────
+
+   box-sizing: border-box
+     The single most useful CSS property in existence. Without it,
+     when you set an element to be 100px wide and give it 10px of
+     padding, the actual visible width becomes 120px (100 + 10 + 10).
+     That makes layout math painful.
+
+     With border-box, the 100px INCLUDES the padding and border.
+     Width becomes a total-size promise, which is far easier to reason
+     about — especially in responsive layouts.
+
+     Every modern stylesheet includes this. It's the de-facto standard.
+   ─────────────────────────────────────────────────────────────────────── */
+* { box-sizing: border-box; }
+
+
+/* ───────────────────────────────────────────────────────────────────────
+   ROOT DOCUMENT ELEMENTS (html and body)
+   ───────────────────────────────────────────────────────────────────────
+
+   These two rules set up the "canvas" the whole page is drawn on.
+   Both html and body are targeted together because they need
+   identical treatment here.
+   ─────────────────────────────────────────────────────────────────────── */
+html, body {
+  /* Remove the browser's default 8px margin around the body.
+     Without this, there'd be a visible white/black border around
+     everything — which breaks the fullscreen-video illusion. */
+  margin: 0;
+
+  /* Both elements fill the full height of their container.
+     100% = "as tall as the parent", which for html resolves to
+     the viewport (browser window) height. */
+  height: 100%;
+
+  /* Pure black background — matches the "cinema" feel and prevents
+     white flash before the video loads. */
+  background: #000;
+
+  /* Default text color for anything not otherwise specified.
+     #e6e9ef is a very light gray with a slight cool tint — softer
+     than pure white, easier on the eyes on a dark background. */
+  color: #e6e9ef;
+
+  /* Font stack: try Segoe UI first (Windows default), fall back to
+     the OS's system UI font (macOS: San Francisco, Linux: whatever),
+     and finally to any sans-serif font. This gives native-looking
+     text on every platform. */
+  font-family: "Segoe UI", system-ui, sans-serif;
+
+  /* Hide any content that overflows the viewport. Prevents scrollbars
+     from appearing if some element is slightly oversized. A media
+     player should never scroll. */
+  overflow: hidden;
+}
+
+
+/* ───────────────────────────────────────────────────────────────────────
+   STAGE CONTAINER (#stage)
+   ───────────────────────────────────────────────────────────────────────
+
+   The black "canvas" that holds the video and placeholder overlay.
+   #stage is the outermost content container — everything visible
+   lives inside it or floats above it.
+   ─────────────────────────────────────────────────────────────────────── */
+#stage {
+  /* position: absolute + inset: 0 = "pin this element to all four
+     corners of its nearest positioned ancestor". Combined, they mean
+     "fill the entire parent". */
+  position: absolute;
+  inset: 0;
+
+  /* Fallback black — visible only if the video fails to load or
+     before the first frame renders. */
+  background: #000;
+}
+
+
+/* ───────────────────────────────────────────────────────────────────────
+   VIDEO ELEMENT (#video)
+   ───────────────────────────────────────────────────────────────────────
+
+   The main video player. Fills the stage and letterboxes widescreen
+   content inside a possibly-taller window.
+   ─────────────────────────────────────────────────────────────────────── */
+#video {
+  /* Pin to all corners of #stage — makes the video fill the whole
+     screen. */
+  position: absolute;
+  inset: 0;
+
+  /* Full width/height of the parent. Redundant with inset: 0 in
+     modern browsers, but harmless and adds clarity. */
+  width: 100%;
+  height: 100%;
+
+  /* object-fit: contain is the magic here.
+     Without it, a 16:9 video stretched into a taller window would
+     look squashed. With "contain", the video is scaled uniformly
+     to fit inside the box, and the leftover space shows the
+     background color (black bars). This is the standard "letterbox"
+     behaviour everyone expects from YouTube and VLC. */
+  object-fit: contain;
+
+  /* Black behind the video — the area not covered by the letterboxed
+     content. Matches the surrounding app so it looks seamless. */
+  background: #000;
+}
+
+
+/* ───────────────────────────────────────────────────────────────────────
+   AUDIO ELEMENT (#audio)
+   ───────────────────────────────────────────────────────────────────────
+
+   The <audio> element exists (in the two-element player mode) so the
+   pitch-shifting graph has something to read from, but it never
+   displays anything.
+
+   Browsers render <audio> with a default player UI (play button,
+   progress bar). We don't want that — the app has its own controls
+   in the WPF window. So we hide it.
+   ─────────────────────────────────────────────────────────────────────── */
+#audio { display: none; }
+
+
+/* ───────────────────────────────────────────────────────────────────────
+   PLACEHOLDER (the "nothing playing" screen)
+   ───────────────────────────────────────────────────────────────────────
+
+   The splash shown when the app starts and after Stop is clicked.
+   Contains the app icon and a hint text.
+   ─────────────────────────────────────────────────────────────────────── */
+#placeholder {
+  /* Fill the whole stage — same trick as the video. */
+  position: absolute;
+  inset: 0;
+
+  /* flex + the following rules center the icon and text both
+     horizontally and vertically. */
+  display: flex;
+  flex-direction: column;    /* stack children vertically */
+  align-items: center;       /* center horizontally */
+  justify-content: center;   /* center vertically */
+
+  /* Space between the icon and the text. */
+  gap: 12px;
+
+  /* Muted blue-gray — visible against black but not shouting for
+     attention. Matches the "idle" mood. */
+  color: #5a6473;
+
+  /* Click-through: the placeholder is purely decorative. Anything
+     underneath (the video element) receives clicks as if the
+     placeholder weren't there. */
+  pointer-events: none;
+
+  /* No text selection: prevents the "blue highlight" that would
+     appear if a user drags across the text. */
+  user-select: none;
+}
+
+/* ───────────────────────────────────────────────────────────────────────
+   HIDDEN STATE — the .hidden class turns the placeholder off
+   ───────────────────────────────────────────────────────────────────────
+
+   When a track starts playing, JavaScript adds class="hidden" to
+   #placeholder. This rule hides it. When the user clicks Stop,
+   JavaScript removes the class and the placeholder reappears.
+
+   Why do it this way instead of changing visibility from JS directly?
+     Because it keeps the CSS in charge of visuals. JavaScript just
+     toggles a class name ("hidden" / not hidden), and the actual
+     "how do I hide it?" decision lives here in the stylesheet where
+     it belongs.
+   ─────────────────────────────────────────────────────────────────────── */
+#placeholder.hidden { display: none; }
+
+
+/* ───────────────────────────────────────────────────────────────────────
+   PLACEHOLDER ICON (.ph-icon)
+   ───────────────────────────────────────────────────────────────────────
+
+   The image (or previously, the ♪ character) shown above the hint
+   text. Note the original rule used font-size for a text glyph; the
+   current version has an <img> with class="ph-icon", so this now
+   sizes the image.
+   ─────────────────────────────────────────────────────────────────────── */
+.ph-icon {
+  /* Size for text version (unused now that an image is shown, but
+     harmless to keep — the img inside overrides via its own rules). */
+  font-size: 64px;
+
+  /* Full opacity — no dimming. If you ever want the icon more subtle,
+     lower this to 0.5 or 0.7. */
+  opacity: 1;
+}
+
+
+/* ───────────────────────────────────────────────────────────────────────
+   PLACEHOLDER TEXT (.ph-text)
+   ───────────────────────────────────────────────────────────────────────
+   The hint text below the icon, e.g. "Search for a track…".
+   ─────────────────────────────────────────────────────────────────────── */
+.ph-text {
+  font-size: 14px;
+
+  /* letter-spacing adds a tiny bit of space between each letter.
+     0.3px is barely noticeable but makes short messages feel less
+     cramped. Standard typographic polish. */
+  letter-spacing: .3px;
+}
+
+
+/* ───────────────────────────────────────────────────────────────────────
+   HUD (Heads-Up Display) — the info overlay at the bottom
+   ───────────────────────────────────────────────────────────────────────
+
+   Shows the track title and channel name over the video. Named after
+   the HUD in video games — a translucent overlay that doesn't block
+   the view.
+   ─────────────────────────────────────────────────────────────────────── */
+#hud {
+  /* Pin to left/right/bottom (not top — it doesn't need to reach
+     the top of the video). */
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  /* Inner spacing: 14px top, 18px sides, 16px bottom.
+     Top padding is slightly less than bottom because the gradient
+     already fades out at the top — no need for extra buffer there. */
+  padding: 14px 18px 16px;
+
+  /* Fade-to-transparent gradient.
+     "linear-gradient(to top, rgba(0,0,0,.85), rgba(0,0,0,0))"
+     starts at the bottom with 85% black and fades to fully
+     transparent at the top. Text on top is always readable because
+     the background provides contrast — a common technique in video
+     players (YouTube, Netflix, etc.). */
+  background: linear-gradient(to top, rgba(0,0,0,.85), rgba(0,0,0,0));
+
+  /* Click-through — the HUD is informational, not interactive.
+     Clicks pass to the video underneath. */
+  pointer-events: none;
+}
+
+
+/* ───────────────────────────────────────────────────────────────────────
+   HUD TITLE (#title) — the bold track name
+   ─────────────────────────────────────────────────────────────────────── */
+#title {
+  font-size: 14px;
+  font-weight: 600;    /* semibold — bolder than normal, not as heavy as bold */
+
+  /* Subtle shadow behind the text.
+     Format: x-offset y-offset blur-radius color.
+     A 1px downward shadow at 3px blur and 90% black opacity gives
+     the text a slight "lift" against busy video content. Without
+     it, white text over a bright video frame can be hard to read. */
+  text-shadow: 0 1px 3px rgba(0,0,0,.9);
+
+  /* If the title is longer than the available width:
+       - white-space: nowrap   → don't wrap to a second line
+       - overflow: hidden      → hide the overflow
+       - text-overflow: ellipsis → show "..." at the cut-off point
+     Result: "Bohemian Rhapsody — Queen (Official Video) [Remastered..."
+     All on one line, with a graceful truncation. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+/* ───────────────────────────────────────────────────────────────────────
+   HUD SUBTITLE (#sub) — channel name below the title
+   ─────────────────────────────────────────────────────────────────────── */
+#sub {
+  font-size: 11.5px;
+  color: #9aa4b2;      /* muted blue-gray — less prominent than the title */
+  margin-top: 3px;     /* small gap between title and subtitle */
+}
+
+
+/* ───────────────────────────────────────────────────────────────────────
+   TOAST — the little popup notification
+   ───────────────────────────────────────────────────────────────────────
+
+   Used for transient messages like "Stream expired — re-resolving…".
+   Slides in at the top-center, sits for a couple seconds, then fades
+   out. JavaScript adds/removes the .show class to control visibility.
+   ─────────────────────────────────────────────────────────────────────── */
+#toast {
+  /* Anchored to the top of the viewport, centered horizontally. */
+  position: absolute;
+  top: 12px;
+  left: 50%;
+
+  /* "left: 50%" puts the LEFT EDGE at the center. This line shifts
+     the whole element left by half its own width — a standard
+     centering trick that works even when the toast's width changes
+     (e.g., longer messages). */
+  transform: translateX(-50%);
+
+  /* Semi-transparent dark background — noticeably lighter than pure
+     black so it stands out against video content.
+     rgba(20, 24, 30, .92) = dark blue-gray at 92% opacity. */
+  background: rgba(20,24,30,.92);
+
+  /* Thin border to define the edges against dark video frames. */
+  border: 1px solid #2b3441;
+
+  /* Text color matches the body text — consistent look. */
+  color: #e6e9ef;
+
+  font-size: 12px;
+  padding: 8px 14px;
+
+  /* Rounded corners (8px radius). Modern, friendly shape. */
+  border-radius: 8px;
+
+  /* ── Initially INVISIBLE ──
+     Opacity 0 makes it transparent. Note: the element still exists
+     and still occupies its position in the layout — it's just not
+     painted. This is different from "display: none" (which removes
+     it from layout entirely). We want it in-layout so the fade-in
+     animation can slide/fade smoothly without causing other
+     elements to move. */
+  opacity: 0;
+
+  /* When opacity changes (0 → 1), animate it over 0.25 seconds with
+     an ease (fast-in, slow-out) curve. This is what makes the toast
+     "fade in" rather than instantly appearing. */
+  transition: opacity .25s ease;
+
+  /* Non-interactive — clicks pass through to whatever is behind. */
+  pointer-events: none;
+
+  /* Prevent very long messages from stretching the toast across the
+     whole window. Cap at 80% of viewport width. */
+  max-width: 80%;
+
+  /* Center multi-line messages. */
+  text-align: center;
+}
+
+
+/* ───────────────────────────────────────────────────────────────────────
+   TOAST SHOWN STATE
+   ───────────────────────────────────────────────────────────────────────
+
+   JavaScript adds class="show" to display the toast. This rule
+   overrides the opacity: 0 above and fades it in (via the transition
+   property set on the base #toast rule).
+
+   When JS removes the class, opacity goes back to 0, and the
+   transition fades it out.
+   ─────────────────────────────────────────────────────────────────────── */
+#toast.show { opacity: 1; }

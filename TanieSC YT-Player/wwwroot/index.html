@@ -1,0 +1,289 @@
+﻿<!-- ═══════════════════════════════════════════════════════════════════
+     DOCTYPE: the very first line of any modern HTML file. It tells the
+     browser "this is HTML5" (the current standard). Without it, the
+     browser would use "quirks mode" — an ancient compatibility mode
+     where CSS and layout behave differently and unpredictably.
+
+     Every page needs this. It's not optional.
+     ═══════════════════════════════════════════════════════════════════ -->
+<!DOCTYPE html>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     HTML ELEMENT: the "root" container. Everything on the page lives
+     inside this tag.
+
+     lang="en" tells screen readers and search engines the page's
+     language. It doesn't change any visuals, but it helps accessibility
+     (a blind user's text-to-speech software will use an English
+     accent/pronunciation rules) and lets browsers offer translation
+     if the user visits from another country.
+     ═══════════════════════════════════════════════════════════════════ -->
+<html lang="en">
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         HEAD: the invisible "settings" section. Nothing inside <head>
+         is displayed on screen. It contains metadata, references to
+         stylesheets and scripts, and other "behind-the-scenes" setup.
+         ═══════════════════════════════════════════════════════════════ -->
+    <head>
+
+        <!-- ─────────────────────────────────────────────────────────
+             CHARSET: tells the browser which character encoding the
+             file uses. "utf-8" is the modern standard — it can
+             represent every character in every language (English,
+             Chinese, Arabic, emoji, etc.) without confusion.
+
+             Without this line, an accented character like "é" might
+             appear as "Ã©" (mojibake) because the browser would guess
+             the wrong encoding. Always keep this line.
+             ───────────────────────────────────────────────────────── -->
+        <meta charset="utf-8" />
+
+        <!-- ─────────────────────────────────────────────────────────
+             VIEWPORT: how should the page scale on different screen
+             sizes?
+
+             "width=device-width" → make the page width match the
+                 device's actual screen width (not a fake mobile width).
+             "initial-scale=1"   → start at 100 % zoom (no auto zoom-in).
+
+             On a desktop WPF app embedded in WebView2 this mostly
+             doesn't matter, but it's the standard boilerplate that
+             keeps the page well-behaved if it's ever opened in a
+             regular browser.
+             ───────────────────────────────────────────────────────── -->
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+        <!-- ─────────────────────────────────────────────────────────
+             TITLE: the text shown in the browser's tab, window title
+             bar, and bookmarks. In a WebView2 app, this is invisible
+             (WebView2 doesn't show a tab), but it's still good practice.
+             ───────────────────────────────────────────────────────── -->
+        <title>Player</title>
+
+        <!-- ─────────────────────────────────────────────────────────
+             FAVICON: the tiny icon next to the page title.
+
+             Normally browsers automatically request "/favicon.ico",
+             and if it's missing they log a 404 error in the console
+             ("Failed to load resource: favicon.ico: 404").
+
+             Setting the icon to "data:," — an empty data URI — tells
+             the browser "the icon is a zero-byte file, stop asking."
+             This silences that 404 without needing to ship a real
+             icon file. Tiny trick, useful when you're watching the
+             console for real errors and don't want noise.
+             ───────────────────────────────────────────────────────── -->
+        <link rel="icon" href="data:," />
+
+        <!-- ─────────────────────────────────────────────────────────
+             STYLESHEET: load the external CSS file that styles the
+             whole page (colors, layout, fonts, animations).
+
+             The leading slash "/" means "relative to the server root".
+             Since the page is served by our local StreamProxy at
+             http://127.0.0.1:PORT/, this resolves to
+             http://127.0.0.1:PORT/style.css, which the proxy serves
+             from the wwwroot folder on disk.
+             ───────────────────────────────────────────────────────── -->
+        <link rel="stylesheet" href="/style.css" />
+    </head>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         BODY: everything the user can see and interact with lives here.
+         ═══════════════════════════════════════════════════════════════ -->
+    <body>
+
+        <!-- ─────────────────────────────────────────────────────────
+             STAGE: a full-screen black container that holds the video,
+             audio, and the "nothing playing" placeholder.
+
+             "Stage" is a metaphor — it's the area where the show
+             happens. Everything else (HUD, toast) floats on top of it
+             as an overlay.
+             ───────────────────────────────────────────────────────── -->
+        <div id="stage">
+
+            <!-- ─────────────────────────────────────────────────────
+                 VIDEO ELEMENT: where the actual moving picture appears.
+
+                 Attributes explained:
+                   id="video"     → CSS and JavaScript identify it by
+                                    this name (document.getElementById
+                                    ("video")).
+                   playsinline    → on mobile browsers, this prevents
+                                    the video from automatically
+                                    going fullscreen when played.
+                                    No effect on desktop.
+                   preload="auto" → hint the browser to start buffering
+                                    the video before the user presses
+                                    play. Ignored for src-less elements
+                                    but harmless.
+
+                 Why is it empty (no src attribute)?
+                   The player page uses MSE (Media Source Extensions):
+                   JavaScript attaches a MediaSource "pipeline" to this
+                   element at runtime. The element sits empty until then,
+                   showing a black box. That's fine — this is what
+                   YouTube, Netflix, and every modern streaming site do.
+                 ───────────────────────────────────────────────────── -->
+            <video id="video" playsinline="" preload="auto"></video>
+
+            <!-- ─────────────────────────────────────────────────────
+                 AUDIO ELEMENT: where the sound plays.
+
+                 Why a separate <audio> element if the video also has
+                 audio? Because our player receives the video and audio
+                 as TWO SEPARATE streams (DASH format). The video element
+                 plays the picture (with its own muted audio track),
+                 and the audio element plays the sound. The two are kept
+                 in sync by JavaScript, and the audio goes through a
+                 Web Audio graph to enable pitch shifting.
+
+                 In MSE mode (single stream), the audio element is
+                 unused — but it stays in the DOM so both player modes
+                 share the same HTML without needing to rewrite it.
+
+                 It's hidden by CSS (display:none) — audio needs no
+                 visual representation.
+                 ───────────────────────────────────────────────────── -->
+            <audio id="audio" preload="auto"></audio>
+
+            <!-- ─────────────────────────────────────────────────────
+                 PLACEHOLDER: the "splash screen" shown when no track
+                 is loaded. The user sees this:
+                   • Right when the app launches.
+                   • After clicking Stop.
+                   • After a track finishes and the player is idle.
+
+                 Hidden automatically when a track starts playing
+                 (JavaScript adds class "hidden", which sets
+                 display:none in CSS).
+                 ───────────────────────────────────────────────────── -->
+            <div id="placeholder">
+
+                <!-- ─────────────────────────────────────────────────
+                     ICON CONTAINER: wraps the image. There used to be
+                     a "♪" text character here (see the commented-out
+                     line below), but it's been replaced with an actual
+                     image file for branding.
+                     ───────────────────────────────────────────────── -->
+                <div class="ph-icon">
+                    <!--
+                         THE PLACEHOLDER IMAGE: a custom icon (probably
+                         the app's logo) shown on the empty state.
+
+                         Attributes explained:
+                           class="ph-icon"        → styled by CSS (size,
+                                                    opacity, maybe an
+                                                    animation).
+                           src="/tanieSC_128x128.ico"
+                                                  → the image file, served
+                                                    from wwwroot on disk
+                                                    via the local proxy.
+                                                    Leading "/" = server root.
+                           alt=""                 → empty alt text. The
+                                                    image is purely
+                                                    decorative (no new
+                                                    information for a
+                                                    screen reader), so we
+                                                    tell assistive tech
+                                                    to skip it. Screen
+                                                    readers will just say
+                                                    "image" and move on.
+                           draggable="false"      → prevents the user
+                                                    from dragging the
+                                                    image out of the page
+                                                    (which would show the
+                                                    ghost-image cursor and
+                                                    allow saving the file
+                                                    by dropping on the
+                                                    desktop).
+                           ondragstart="return false;"
+                                                  → belt-and-braces. Even
+                                                    with draggable=false,
+                                                    some older browsers
+                                                    still fire dragstart;
+                                                    returning false from
+                                                    the handler cancels
+                                                    the drag entirely.
+
+                         If the image file is missing, you'll see a
+                         broken-image icon here instead. Add
+                         tanieSC_128x128.ico to the wwwroot folder to
+                         fix it.
+                         ───────────────────────────────────────────────── -->
+                    <img class="ph-icon" src="/tanieSC_128x128.ico" alt="" draggable="false" ondragstart="return false;"/>
+                </div>
+
+                <!-- ─────────────────────────────────────────────────
+                     PLACEHOLDER TEXT: the hint text below the icon.
+                     Currently "..." (probably to be filled in later
+                     with something like "Search for a track and
+                     double-click a result").
+                     ───────────────────────────────────────────────── -->
+                <div class="ph-text">...</div>
+            </div>
+        </div>
+
+        <!-- ─────────────────────────────────────────────────────────
+             HUD (Heads-Up Display): the info overlay in the bottom-
+             left corner showing what's currently playing.
+
+             "HUD" is a gaming term — a transparent overlay that shows
+             status without blocking the view. It floats above the video
+             (thanks to absolute positioning + z-index in CSS) with a
+             dark gradient background so text is readable against any
+             video content.
+             ───────────────────────────────────────────────────────── -->
+        <div id="hud">
+
+            <!-- Track title shown in bold at the bottom of the screen. -->
+            <div id="title">Nothing loaded</div>
+
+            <!-- Smaller subtitle line: usually the artist/channel name. -->
+            <div id="sub"></div>
+        </div>
+
+        <!-- ─────────────────────────────────────────────────────────
+             TOAST: a small popup notification that slides in for a
+             few seconds ("Now playing…", "Error loading stream", etc.)
+             and then fades out.
+
+             Empty for now — JavaScript creates and populates it at
+             runtime when needed. CSS keeps it invisible by default
+             (opacity: 0) and animates it in when the class "show" is
+             added.
+             ───────────────────────────────────────────────────────── -->
+        <div id="toast"></div>
+
+        <!-- ─────────────────────────────────────────────────────────
+             JAVASCRIPT: the player's "brains".
+
+             This file contains all the logic that makes the player
+             work:
+               • Receives commands from the C# side (play, pause,
+                 change pitch, etc.).
+               • Manages the two media elements.
+               • Runs the MSE pipeline (feeding video and audio
+                 source buffers).
+               • Runs the Web Audio graph for pitch shifting.
+               • Reports state, position, and errors back to C#.
+
+             It's loaded at the END of the body, not in <head>, for a
+             subtle reason: scripts run in order, and a script placed
+             at the bottom runs AFTER all the HTML above it exists in
+             the DOM. That way the JS can immediately call
+             document.getElementById("video") and get a real element,
+             instead of null.
+
+             The other common technique is to put the script in <head>
+             with a "defer" attribute, which achieves the same effect.
+             Both are fine.
+
+             The leading "/" means it loads from the server root —
+             same as the CSS above.
+             ───────────────────────────────────────────────────────── -->
+        <script src="/yt-app.js"></script>
+    </body>
+</html>

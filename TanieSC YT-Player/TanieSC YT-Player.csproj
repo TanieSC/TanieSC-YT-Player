@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <RootNamespace>TanieSC_YT_Player</RootNamespace>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <ApplicationIcon>tanieSC_128x128.ico</ApplicationIcon>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<Content Include="wwwroot\**\*" CopyToOutputDirectory="PreserveNewest" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="tanieSC_128x128.ico" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4258.31" />
+	  <PackageReference Include="YoutubeExplode" Version="6.6.2" />
+	</ItemGroup>
+
+</Project>
