@@ -114,6 +114,11 @@ dotnet run --project TanieSC_YT_Player
 * Move the Tempo slider to change playback speed.
 * Pitch stays constant — you can slow a track to 0.75× without hearing a "chipmunk" or "deep voice" effect.
 
+### Saving favorites
+1. Play a track.
+2. Adjust pitch/tempo to your liking.
+3. Click the ★ button on the search result — the track is saved with its current pitch.
+4. Next time, double-click it in the Favorites tab — it plays at the saved pitch automatically.
 ---
 
 ## How It Works
