@@ -100,7 +100,16 @@ dotnet run --project TanieSC_YT_Player
 
 ## Usage
 
+### Basic playback
 
+1. Launch the app.
+2. Type a search query in the Search YouTube box, press Enter.
+3. Double-click a result (or click the ▶ button next to it) to play.
+
+### Pitch shifting
+* Move the Transpose slider to shift by whole semitones (−12 to +12).
+* Move the Cents slider for fine adjustment (±100 cents = ±1 semitone).
+* The label below shows the total shift: +3.50 st • 1.222×.
 ---
 
 ## How It Works
