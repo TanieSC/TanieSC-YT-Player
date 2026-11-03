@@ -4,6 +4,8 @@
 
 TanieSC YT Player is a WPF desktop application that plays YouTube audio through a custom DSP pipeline — letting you **transpose in semitones**, **fine-tune in cents**, and **change tempo without affecting pitch**, all in real time.
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 <p align="center">
   <img src="screenshot-main.png" alt="TanieSC YT Player" width="900">
 </p>
