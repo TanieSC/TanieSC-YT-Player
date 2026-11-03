@@ -160,6 +160,33 @@ The app is composed of five cooperating layers:
 
 ---
 
+## Project Structure
+```text
+TanieSC_YT_Player/
+├── MainWindow.xaml                WPF UI layout
+├── MainWindow.xaml.cs             UI logic, event handlers
+├── App.xaml / App.xaml.cs         Application entry point
+├── ThumbnailConverter.cs          Converts thumbnail URLs to images
+├── TanieSC_YT_Player.csproj
+│
+├── Services/
+│   ├── YouTubeService.cs          Search + stream resolution (YoutubeExplode)
+│   ├── StreamProxy.cs             Local HTTP proxy for media streams
+│   ├── PlayerBridge.cs            C# ↔ JS message bridge
+│   └── FavoritesStore.cs          JSON persistence for favorites
+│
+├── wwwroot/                       Served by StreamProxy at runtime
+│   ├── index.html                 Player page
+│   ├── style.css                  Dark theme
+│   ├── yt-app.js                  Player logic, Web Audio graph
+│   ├── soundtouch-core.js         SoundTouch DSP library (LGPL)
+│   └── pitch-shifter-worklet-edit.js   AudioWorklet wrapper
+│
+└── docs/                          Screenshots, diagrams
+
+```
+---
+
 ## License
 
 MIT — see [LICENSE](LICENSE.txt).
