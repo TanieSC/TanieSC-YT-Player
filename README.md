@@ -101,6 +101,6 @@ dotnet run --project TanieSC_YT_Player
 
 MIT — see [LICENSE](LICENSE).
 
-Third-party dependencies and their licenses are listed in [NOTICE](NOTICE).
+Third-party dependencies and their licenses are listed in [NOTICE](NOTICE.md).
 
 
